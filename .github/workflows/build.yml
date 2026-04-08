@@ -1,0 +1,55 @@
+name: Build Project
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          
+      - name: Install Dependencies
+        working-directory: ./client
+        run: npm install
+
+      - name: Build Frontend
+        working-directory: ./client
+        run: npm run build
+
+  build-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          
+      - name: Install Dependencies
+        working-directory: ./my-store
+        run: npm install
+
+      - name: Build Backend
+        working-directory: ./my-store
+        # Generate a mock .env file so Strapi can build without missing ENV errors
+        run: |
+          echo "HOST=0.0.0.0" > .env
+          echo "PORT=1337" >> .env
+          echo "APP_KEYS=key1,key2" >> .env
+          echo "API_TOKEN_SALT=salt1" >> .env
+          echo "ADMIN_JWT_SECRET=jwt1" >> .env
+          echo "TRANSFER_TOKEN_SALT=salt2" >> .env
+          echo "JWT_SECRET=jwt2" >> .env
+          npm run build
