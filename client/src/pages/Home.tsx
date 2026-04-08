@@ -2,11 +2,12 @@ import { useQuery } from "@tanstack/react-query";
 import { api, getStrapiMedia } from "../lib/api";
 import type { Product, StrapiResponse } from "../types";
 import { Link } from "react-router-dom";
-import { Loader2 } from "lucide-react";
+import { Loader2, Package, CreditCard, MessageSquare, Truck } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
+import { ProductCard } from "../components/ProductCard";
 
 export default function Home() {
-    const { t, dir } = useLanguage();
+    const { t, dir, language } = useLanguage();
     const { data: productsData, isLoading } = useQuery({
         queryKey: ["featured-products"],
         queryFn: async () => {
@@ -18,6 +19,71 @@ export default function Home() {
     });
 
     const products = productsData?.data || [];
+
+    // Filter products strictly by category name matching
+    const hommeProducts = products.filter(p => p.categories?.some(c => c.name.toLowerCase().includes('homme') || c.name.toLowerCase().includes('men')));
+    const femmeProducts = products.filter(p => p.categories?.some(c => c.name.toLowerCase().includes('femme') || c.name.toLowerCase().includes('women')));
+    const enfantProducts = products.filter(p => p.categories?.some(c => c.name.toLowerCase().includes('enfant') || c.name.toLowerCase().includes('fille') || c.name.toLowerCase().includes('garçon') || c.name.toLowerCase().includes('kid')));
+
+    const renderCategory = (title: string, bannerImg: string, items: Product[]) => {
+        const safeTitle = title.replace(/\s+/g, '-').toLowerCase();
+
+        return (
+            <div className="mb-24 w-full">
+                {/* Large Banner Image */}
+                <div className="w-full h-[400px] md:h-[600px] mb-12 relative overflow-hidden group">
+                    <img src={bannerImg} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" alt={title} />
+                    <div className="absolute inset-0 bg-black/20 transition-colors duration-500 group-hover:bg-black/40 flex items-center justify-center">
+                       <h2 className="text-white text-5xl md:text-8xl font-black uppercase tracking-tighter drop-shadow-2xl">{title}</h2>
+                    </div>
+                </div>
+
+                {/* Title */}
+                <div className="text-center mb-10 px-4">
+                    <h3 className="text-3xl md:text-4xl font-black uppercase tracking-tight">
+                        {language === 'ar' ? `الأكثر مبيعاً ${title}` : `Best sellers ${title}`}
+                    </h3>
+                    <div className="w-16 h-1 bg-black mx-auto mt-4 mb-8"></div>
+                </div>
+
+                {/* Carousel or Empty State */}
+                {items.length === 0 ? (
+                    <div className="flex justify-center items-center py-10 bg-gray-50 border border-dashed border-gray-200 mx-4 md:mx-10">
+                        <p className="text-gray-400 font-bold uppercase tracking-widest text-xs text-center">
+                            {language === 'ar' ? 'لا توجد منتجات في هذا القسم حاليا' : 'Aucun produit disponible dans cette catégorie pour le moment.'}
+                        </p>
+                    </div>
+                ) : (
+                    <div className="relative w-full overflow-hidden group/carousel bg-white py-4">
+                        <div className="absolute left-0 top-0 bottom-0 w-16 md:w-32 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
+                        <div className="absolute right-0 top-0 bottom-0 w-16 md:w-32 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
+
+                        <div className={`flex gap-6 animate-marquee-${safeTitle} w-max`}>
+                            {/* Duplicate arrays for seamless infinite scroll */}
+                            {[...items, ...items, ...items, ...items].map((p, i) => (
+                                <div key={`${p.documentId}-${i}`} className="w-[65vw] md:w-[280px] shrink-0">
+                                    <ProductCard product={p} />
+                                </div>
+                            ))}
+                        </div>
+
+                        <style>{`
+                            @keyframes marquee-${safeTitle} {
+                                0% { transform: translateX(0); }
+                                100% { transform: translateX(-25%); }
+                            }
+                            .animate-marquee-${safeTitle} {
+                                animation: marquee-${safeTitle} 28s linear infinite;
+                            }
+                            .group\\/carousel:hover .animate-marquee-${safeTitle} {
+                                animation-play-state: paused;
+                            }
+                        `}</style>
+                    </div>
+                )}
+            </div>
+        );
+    };
 
     return (
         <div className="flex flex-col min-h-screen bg-[#0a0a0c] font-sans">
@@ -48,11 +114,8 @@ export default function Home() {
             </section>
 
 
-            {/* Featured Categories / Products Grid */}
-            <section className="container mx-auto px-4 py-16 bg-white">
-                <div className="mb-12 text-center">
-                    <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tighter border-b-8 border-black inline-block pb-2">{t.home.essentials}</h2>
-                </div>
+            {/* CATEGORIES SECTIONS */}
+            <section className="w-full bg-white pt-16 pb-8">
                 {isLoading ? (
                     <div className="flex justify-center py-20">
                         <Loader2 className="h-10 w-10 animate-spin text-black" />
@@ -62,56 +125,22 @@ export default function Home() {
                         {t.home.noFeatured}
                     </div>
                 ) : (
-                    <div className="relative w-full overflow-hidden group bg-white py-4">
-                        <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
-                        <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
-
-                        <div className="flex gap-6 animate-marquee w-max">
-                            {[...products, ...products, ...products].map((product, index) => {
-                                const link = product.slug ? `/products/${product.slug}` : `/products/${product.documentId}`;
-                                const image = product.cover?.url || product.image?.[0]?.url || "";
-                                return (
-                                    <Link
-                                        to={link}
-                                        key={`${product.id}-${index}`}
-                                        className="relative w-[280px] h-[380px] flex-shrink-0 overflow-hidden bg-gray-50 border-2 border-transparent hover:border-black group/item transition-all"
-                                    >
-                                        {image ? (
-                                            <img
-                                                src={getStrapiMedia(image) || ""}
-                                                alt={product.name}
-                                                className="h-full w-full object-cover transition-transform duration-1000 group-hover/item:scale-110"
-                                            />
-                                        ) : (
-                                            <div className="h-full w-full flex items-center justify-center text-gray-300 bg-gray-50">
-                                                <span className="text-xs uppercase font-bold">No Image</span>
-                                            </div>
-                                        )}
-
-                                        <div className="absolute inset-0 bg-black/0 group-hover/item:bg-black/5 transition-colors duration-300" />
-
-                                        <div className="absolute bottom-4 left-4 right-4 translate-y-2 opacity-0 group-hover/item:translate-y-0 group-hover/item:opacity-100 transition-all duration-500">
-                                            <span className="inline-block w-full text-center bg-black text-white text-[10px] font-black uppercase tracking-widest px-4 py-4 shadow-2xl">
-                                                {product.name}
-                                            </span>
-                                        </div>
-                                    </Link>
-                                )
-                            })}
-                        </div>
-
-                        <style>{`
-                            @keyframes marquee {
-                                0% { transform: translateX(0); }
-                                100% { transform: translateX(-33.33%); }
-                            }
-                            .animate-marquee {
-                                animation: marquee 30s linear infinite;
-                            }
-                            .group:hover .animate-marquee {
-                                animation-play-state: paused;
-                            }
-                        `}</style>
+                    <div className="flex flex-col w-full">
+                        {renderCategory(
+                            language === 'ar' ? 'رجال' : 'Homme',
+                            'https://images.unsplash.com/photo-1614252369475-531eba835eb1?w=1600&h=800&fit=crop',
+                            hommeProducts
+                        )}
+                        {renderCategory(
+                            language === 'ar' ? 'نساء' : 'Femme',
+                            'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=1600&h=800&fit=crop',
+                            femmeProducts
+                        )}
+                        {renderCategory(
+                            language === 'ar' ? 'أطفال' : 'Enfant',
+                            'https://images.unsplash.com/photo-1514989940723-e8e51635b782?w=1600&h=800&fit=crop',
+                            enfantProducts
+                        )}
                     </div>
                 )}
             </section>
@@ -126,6 +155,49 @@ export default function Home() {
                     <Link to="/products" className="inline-block bg-white text-black px-12 py-5 text-xs font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all active:scale-95 shadow-2xl">
                         {t.home.teaserBtn}
                     </Link>
+                </div>
+            </section>
+
+            {/* Features / Guarantees Section */}
+            <section className="w-full bg-white border-b border-gray-100 py-12 md:py-16">
+                <div className="container mx-auto px-4 max-w-7xl">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-4 divide-y sm:divide-y-0 sm:divide-x divide-gray-100">
+                        {/* Feature 1 */}
+                        <div className="flex items-center gap-4 pt-6 sm:pt-0 sm:px-4 lg:px-8">
+                            <Package className="h-8 w-8 text-black shrink-0" strokeWidth={1.5} />
+                            <div>
+                                <h3 className="text-[13px] font-black">{language === 'ar' ? 'توصيل مجاني' : 'Livraison Gratuite'}</h3>
+                                <p className="text-[12px] text-gray-500 mt-0.5">{language === 'ar' ? 'للمشتريات بقيمة 150 دينار أو أكثر' : 'A partir de 150DT d\'achats'}</p>
+                            </div>
+                        </div>
+
+                        {/* Feature 2 */}
+                        <div className="flex items-center gap-4 pt-6 sm:pt-0 sm:px-4 lg:px-8">
+                            <CreditCard className="h-8 w-8 text-black shrink-0" strokeWidth={1.5} />
+                            <div>
+                                <h3 className="text-[13px] font-black">{language === 'ar' ? 'دفع آمن' : 'Paiement sécurisé'}</h3>
+                                <p className="text-[12px] text-gray-500 mt-0.5">{language === 'ar' ? 'الدفع عند الاستلام' : 'Paiement à la livraison'}</p>
+                            </div>
+                        </div>
+
+                        {/* Feature 3 */}
+                        <div className="flex items-center gap-4 pt-6 sm:pt-0 sm:px-4 lg:px-8">
+                            <MessageSquare className="h-8 w-8 text-black shrink-0" strokeWidth={1.5} />
+                            <div>
+                                <h3 className="text-[13px] font-black">{language === 'ar' ? 'رضا مضمون' : 'Satisfaction garantie'}</h3>
+                                <p className="text-[12px] text-gray-500 mt-0.5">{language === 'ar' ? 'خدمة عملاء في استماعكم' : 'Un service client à votre écoute'}</p>
+                            </div>
+                        </div>
+
+                        {/* Feature 4 */}
+                        <div className="flex items-center gap-4 pt-6 sm:pt-0 sm:px-4 lg:px-8">
+                            <Truck className="h-8 w-8 text-black shrink-0" strokeWidth={1.5} />
+                            <div>
+                                <h3 className="text-[13px] font-black">{language === 'ar' ? 'توصيل سريع' : 'Livraison rapide'}</h3>
+                                <p className="text-[12px] text-gray-500 mt-0.5">{language === 'ar' ? 'منتجاتك تصلك خلال 24/48 ساعة' : 'Vos articles en 24/48h chez vous'}</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
 

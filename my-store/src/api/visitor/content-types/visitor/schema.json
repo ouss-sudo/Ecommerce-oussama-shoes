@@ -1,0 +1,32 @@
+{
+    "kind": "collectionType",
+    "collectionName": "visitors",
+    "info": {
+        "singularName": "visitor",
+        "pluralName": "visitors",
+        "displayName": "Visitor Tracking",
+        "description": "Tracks unique visitors and their last activity"
+    },
+    "options": {
+        "draftAndPublish": false
+    },
+    "pluginOptions": {},
+    "attributes": {
+        "identifier": {
+            "type": "string",
+            "unique": true,
+            "required": true
+        },
+        "last_seen": {
+            "type": "datetime",
+            "required": true
+        },
+        "page_visited": {
+            "type": "string"
+        },
+        "is_online": {
+            "type": "boolean",
+            "default": true
+        }
+    }
+}

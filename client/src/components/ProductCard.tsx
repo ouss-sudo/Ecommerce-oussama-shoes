@@ -92,21 +92,47 @@ export function ProductCard({
                 )}
             </div>
 
-            <Link to={productLink} className={`mt-5 space-y-1.5 block ${dir === 'rtl' ? 'text-right' : ''}`}>
+            <Link to={productLink} className={`mt-5 space-y-2 block ${dir === 'rtl' ? 'text-right' : ''}`}>
                 <h3 className="text-[13px] font-black uppercase tracking-widest leading-none text-black group-hover:text-red-600 transition-colors">
                     {product.name}
                 </h3>
                 <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400">
                     {translatedCategory}
                 </p>
-                <div className="flex items-center gap-3 pt-1">
-                    <span className="text-[16px] font-black text-red-600 tracking-tight">
-                        {product.price_display}
-                    </span>
-                    {product.old_price && (
-                        <span className="text-[13px] font-bold text-gray-300 line-through decoration-gray-200">
-                            {product.old_price}
+
+                {/* ── Premium Price Section ── */}
+                <div className={`flex items-center gap-2 pt-1 flex-wrap ${dir === 'rtl' ? 'flex-row-reverse justify-end' : ''}`}>
+                    {/* Current Price */}
+                    <div className="relative">
+                        <span className="text-[18px] font-black tracking-tight text-black leading-none">
+                            {product.price_display}
                         </span>
+                        {/* Red underline accent */}
+                        <span className="absolute -bottom-0.5 left-0 h-[3px] w-full bg-gradient-to-r from-red-600 to-orange-400 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300" />
+                    </div>
+
+                    {product.old_price && (
+                        <>
+                            {/* Old price strikethrough */}
+                            <span className="text-[12px] font-bold text-gray-300 line-through decoration-gray-200">
+                                {product.old_price}
+                            </span>
+
+                            {/* Discount % pill */}
+                            {(() => {
+                                const current = parseFloat(String(product.price_display).replace(/[^0-9.]/g, ''));
+                                const old = parseFloat(String(product.old_price).replace(/[^0-9.]/g, ''));
+                                if (old > current) {
+                                    const pct = Math.round((1 - current / old) * 100);
+                                    return (
+                                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-black bg-red-600 text-white uppercase tracking-wide shadow-sm shadow-red-200 animate-pulse">
+                                            -{pct}%
+                                        </span>
+                                    );
+                                }
+                                return null;
+                            })()}
+                        </>
                     )}
                 </div>
             </Link>

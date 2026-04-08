@@ -10,6 +10,7 @@ import type { Language } from "../i18n/translations";
 export function Navbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isLangOpen, setIsLangOpen] = useState(false);
+    const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const { cartCount } = useCart();
     const { user, logout } = useAuth();
@@ -97,18 +98,38 @@ export function Navbar() {
                     </form>
 
                     {user ? (
-                        <div className="relative group flex h-10 w-10 items-center justify-center hover:bg-gray-100 rounded-full cursor-pointer">
-                            <div className="h-6 w-6 bg-black rounded-full flex items-center justify-center text-white text-[10px] font-black">
+                        <div className="relative flex h-10 w-10 items-center justify-center">
+                            <button
+                                onClick={() => { setIsUserMenuOpen(!isUserMenuOpen); setIsLangOpen(false); }}
+                                className="h-10 w-10 bg-black rounded-full flex items-center justify-center text-white text-[10px] font-black hover:bg-gray-800 transition-colors focus:outline-none"
+                            >
                                 {user.username.charAt(0).toUpperCase()}
-                            </div>
-                            <div className={`absolute top-full ${dir === 'rtl' ? 'left-0' : 'right-0'} w-44 bg-white shadow-2xl border border-gray-100 py-2 mt-1 hidden group-hover:block z-50 animate-in fade-in slide-in-from-top-1`}>
-                                <Link to="/profile" className="block w-full text-left rtl:text-right px-4 py-2 text-[10px] font-black uppercase tracking-widest hover:bg-gray-50 text-black border-b border-gray-50">
-                                    {t.nav.profile}
-                                </Link>
-                                <button onClick={logout} className="block w-full text-left rtl:text-right px-4 py-2 text-[10px] font-black uppercase tracking-widest hover:bg-gray-50 text-red-600 bg-white">
-                                    {t.nav.logout}
-                                </button>
-                            </div>
+                            </button>
+                            {isUserMenuOpen && (
+                                <>
+                                    {/* Click outside to close */}
+                                    <div className="fixed inset-0 z-40" onClick={() => setIsUserMenuOpen(false)} />
+                                    <div className={`absolute top-full ${dir === 'rtl' ? 'left-0' : 'right-0'} w-48 bg-white shadow-2xl border border-gray-100 py-2 mt-2 z-50 rounded-xl overflow-hidden animate-in fade-in slide-in-from-top-1`}>
+                                        <div className="px-4 py-2 border-b border-gray-50">
+                                            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">{user.username}</p>
+                                            <p className="text-[9px] text-gray-300 truncate">{user.email}</p>
+                                        </div>
+                                        <Link
+                                            to="/profile"
+                                            onClick={() => setIsUserMenuOpen(false)}
+                                            className="flex items-center gap-2 w-full px-4 py-3 text-[10px] font-black uppercase tracking-widest hover:bg-gray-50 text-black transition-colors"
+                                        >
+                                            {t.nav.profile || 'Mon Profil'}
+                                        </Link>
+                                        <button
+                                            onClick={() => { logout(); setIsUserMenuOpen(false); }}
+                                            className="flex items-center gap-2 w-full px-4 py-3 text-[10px] font-black uppercase tracking-widest hover:bg-red-50 text-red-600 transition-colors"
+                                        >
+                                            {t.nav.logout || 'Déconnexion'}
+                                        </button>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     ) : (
                         <Link to="/login" className="flex h-10 items-center justify-center hover:bg-gray-100 px-3 text-[10px] font-black uppercase tracking-widest transition-colors">
@@ -203,11 +224,27 @@ export function Navbar() {
                         </div>
                     </div>
 
-                    {!user && (
+                    {!user ? (
                         <div className="border-t border-gray-100 pt-8 flex flex-col space-y-5">
                             <Link to="/login" className="text-sm font-black uppercase tracking-[0.2em]" onClick={() => setIsMenuOpen(false)}>
                                 {t.nav.login}
                             </Link>
+                        </div>
+                    ) : (
+                        <div className="border-t border-gray-100 pt-8 flex flex-col space-y-4">
+                            <Link
+                                to="/profile"
+                                className="text-sm font-black uppercase tracking-[0.2em] text-black"
+                                onClick={() => setIsMenuOpen(false)}
+                            >
+                                {t.nav.profile || 'Mon Profil'}
+                            </Link>
+                            <button
+                                onClick={() => { logout(); setIsMenuOpen(false); }}
+                                className="text-left text-sm font-black uppercase tracking-[0.2em] text-red-600"
+                            >
+                                {t.nav.logout || 'Déconnexion'}
+                            </button>
                         </div>
                     )}
                 </div>

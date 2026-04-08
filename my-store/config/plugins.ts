@@ -16,4 +16,19 @@ export default ({ env }) => ({
             },
         },
     },
+    upload: {
+        config: {
+            breakpoints: {
+                xlarge: 1920,
+                large: 1000,
+                medium: 750,
+                small: 500,
+                xsmall: 64,
+            },
+            sizeLimit: 10 * 1024 * 1024, // 10MB
+            // Disable responsive images on Windows (causes EPERM temp file errors)
+            responsiveDimensions: false,
+        },
+    },
 });
+

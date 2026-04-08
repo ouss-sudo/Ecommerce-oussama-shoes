@@ -17,6 +17,7 @@ import Profile from "./pages/Profile";
 import { CartProvider } from "./context/CartContext";
 import { AuthProvider } from "./context/AuthContext";
 import { LanguageProvider } from "./context/LanguageContext";
+import { AnalyticsTracker } from "./components/AnalyticsTracker";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ function App() {
           <AuthProvider>
             <CartProvider>
               <BrowserRouter>
+                <AnalyticsTracker />
                 <div className="flex min-h-screen flex-col bg-background font-sans text-foreground antialiased">
                   <Navbar />
                   <main className="flex-1">

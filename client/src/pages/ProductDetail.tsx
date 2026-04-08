@@ -10,6 +10,7 @@ import { useAuth } from "../context/AuthContext";
 import { DeliveryInfoModal } from "../components/DeliveryInfoModal";
 import { useLanguage } from "../context/LanguageContext";
 import { ProductRating } from "../components/ProductRating";
+import { ProductCard } from "../components/ProductCard";
 
 export default function ProductDetail() {
     const { slug } = useParams<{ slug: string }>();
@@ -30,6 +31,19 @@ export default function ProductDetail() {
 
     const product = productsData?.data?.[0];
 
+    const { data: relatedProductsData, error: relatedProductsError } = useQuery({
+        queryKey: ["related-products-v3"],
+        queryFn: async () => {
+             const res = await api.get<StrapiResponse<Product>>(
+                 `/products?populate=*`
+             );
+             return res.data;
+        }
+    });
+    // TEMPORAIRE: On ne filtre plus le produit exact pour vérifier 
+    // si l'API retourne bien quelque chose (si vous n'avez qu'un seul produit en base)
+    const relatedProducts = (relatedProductsData?.data || []).slice(0, 8);
+
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [selectedColor, setSelectedColor] = useState<number | null>(null);
     const [selectedSize, setSelectedSize] = useState<string | null>(null);
@@ -37,6 +51,21 @@ export default function ProductDetail() {
     const [isDeliveryModalOpen, setIsDeliveryModalOpen] = useState(false);
     const [miniRating, setMiniRating] = useState<{ avg: number; count: number } | null>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
+    const [showStickyBar, setShowStickyBar] = useState(false);
+    const heroRef = useRef<HTMLDivElement>(null);
+
+    // Show sticky bar after scrolling past the add-to-cart section
+    useEffect(() => {
+        const onScroll = () => {
+            const hero = heroRef.current;
+            if (hero) {
+                const rect = hero.getBoundingClientRect();
+                setShowStickyBar(rect.bottom < 0);
+            }
+        };
+        window.addEventListener('scroll', onScroll, { passive: true });
+        return () => window.removeEventListener('scroll', onScroll);
+    }, []);
 
     useEffect(() => {
         if (product) {
@@ -103,7 +132,7 @@ export default function ProductDetail() {
                 {t.productDetail.back}
             </Link>
 
-            <div className="grid gap-12 md:grid-cols-2 lg:gap-20">
+            <div className="grid gap-12 md:grid-cols-2 lg:gap-20" ref={heroRef}>
                 <div className="flex flex-col gap-6">
                     <div className="relative aspect-square overflow-hidden bg-white border border-gray-100 shadow-2xl group">
                         {allImages.length > 0 ? (
@@ -231,16 +260,45 @@ export default function ProductDetail() {
                         </h1>
                     </div>
 
-                    <div className={`flex items-baseline gap-4 ${dir === 'rtl' ? 'flex-row-reverse' : ''}`}>
-                        <span className="text-4xl font-black tracking-tight text-red-600">
-                            {product.price_display}
-                        </span>
-                        {product.old_price && (
-                            <span className="text-xl font-bold text-gray-300 line-through decoration-gray-200">
-                                {product.old_price}
-                            </span>
-                        )}
-                    </div>
+                    {/* ── DESIGN PRIX "2026" ULTRA-PREMIUM ── */}
+                    {(() => {
+                        const parsePrice = (priceStr: string | null | undefined) => {
+                            if (!priceStr) return 0;
+                            const num = parseFloat(priceStr.replace(/[^0-9,.]/g, '').replace(',', '.'));
+                            return isNaN(num) ? 0 : num;
+                        };
+                        const currentPrice = parsePrice(product.price_display);
+                        const oldPrice = parsePrice(product.old_price);
+                        const discount = oldPrice > currentPrice ? Math.round(((oldPrice - currentPrice) / oldPrice) * 100) : 0;
+
+                        return (
+                            <div className={`flex flex-col gap-2 ${dir === 'rtl' ? 'items-end' : 'items-start'}`}>
+                                {discount > 0 && (
+                                    <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-red-600/10 border border-red-600/20 rounded-full mb-1">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse"></div>
+                                        <span className="text-[10px] font-black uppercase text-red-600 tracking-widest">{language === 'ar' ? 'عرض خاص' : 'Offre Spéciale'}</span>
+                                    </div>
+                                )}
+                                
+                                <div className={`flex items-end gap-3 md:gap-5 ${dir === 'rtl' ? 'flex-row-reverse' : ''}`}>
+                                    <span className="text-4xl md:text-5xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-red-600 to-red-400 drop-shadow-sm">
+                                        {product.price_display}
+                                    </span>
+                                    
+                                    {product.old_price && discount > 0 && (
+                                        <div className={`flex items-center gap-2 mb-1`}>
+                                            <span className="text-lg md:text-xl font-bold text-gray-300 line-through decoration-red-500/30 decoration-2">
+                                                {product.old_price}
+                                            </span>
+                                            <span className="px-2 py-0.5 bg-black text-white text-[10px] font-black tracking-widest rounded-md transform -skew-x-12 shadow-lg">
+                                                -{discount}%
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        );
+                    })()}
 
                     <div className={`space-y-4 ${dir === 'rtl' ? 'text-right' : ''}`}>
                         <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400">{language === 'ar' ? 'الوصف' : 'Description'}</p>
@@ -493,6 +551,116 @@ export default function ProductDetail() {
                     onRatingChange={(avg, count) => setMiniRating(count > 0 ? { avg, count } : null)}
                 />
             </div>
+
+            {/* ── Related Products Carousel ── */}
+            <div className="mt-24 border-t border-gray-100 pt-16 pb-24">
+                <h2 className={`text-2xl md:text-3xl font-black uppercase tracking-tight mb-8 ${dir === 'rtl' ? 'text-right' : ''}`}>
+                    {language === 'ar' ? 'قد يعجبك أيضاً' : language === 'en' ? 'You might also like' : 'Vous aimerez aussi'}
+                </h2>
+                
+                {relatedProductsError && (
+                    <p className="text-red-500">Erreur de chargement des produits: {(relatedProductsError as Error).message}</p>
+                )}
+
+                {relatedProducts.length === 0 && !relatedProductsError && (
+                    <p className="text-gray-500">Aucun produit similaire trouvé.</p>
+                )}
+
+                {relatedProducts.length > 0 && (
+                    <div className="relative w-full overflow-hidden group bg-white py-4 mt-8">
+                        <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
+                        <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
+
+                        <div className="flex gap-6 animate-marquee w-max">
+                            {/* Duplicate array 3 times for seamless infinite scroll */}
+                            {[...relatedProducts, ...relatedProducts, ...relatedProducts, ...relatedProducts].map((p, index) => (
+                                <div key={`${p.documentId}-${index}`} className="w-[200px] md:w-[240px] shrink-0">
+                                    <ProductCard product={p} />
+                                </div>
+                            ))}
+                        </div>
+
+                        <style>{`
+                            @keyframes marquee {
+                                0% { transform: translateX(0); }
+                                100% { transform: translateX(-25%); }
+                            }
+                            .animate-marquee {
+                                animation: marquee 25s linear infinite;
+                            }
+                            .group:hover .animate-marquee {
+                                animation-play-state: paused;
+                            }
+                        `}</style>
+                    </div>
+                )}
+            </div>
+
+            {/* ── Sticky Bottom Bar ── */}
+            {showStickyBar && !isDeliveryModalOpen && !isTryOnOpen && (
+                <div className="fixed bottom-0 left-0 right-0 z-[100] bg-white border-t border-gray-100 shadow-[0_-8px_30px_rgba(0,0,0,0.12)] animate-in slide-in-from-bottom-2 duration-200">
+                    <div className="container max-w-[1400px] mx-auto px-4 py-3 flex items-center gap-3 md:gap-6">
+                        {/* Product thumb + info */}
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                            {(product.cover?.url || product.image?.[0]?.url) && (
+                                <img
+                                    src={getStrapiMedia(product.cover?.url || product.image?.[0]?.url || '') || ''}
+                                    alt={product.name}
+                                    className="h-12 w-12 object-cover rounded-lg shrink-0 border border-gray-100"
+                                />
+                            )}
+                            <div className="min-w-0 hidden sm:block">
+                                <p className="text-[11px] font-black uppercase tracking-widest text-black truncate">{product.name}</p>
+                                <p className="text-[13px] font-black text-red-600">{product.price_display}</p>
+                            </div>
+                        </div>
+
+                        {/* Size selector compact */}
+                        {(() => {
+                            let sizeList: string[] = [];
+                            if (Array.isArray(product.sizes)) sizeList = product.sizes as string[];
+                            else if (product.sizes && typeof product.sizes === 'object' && 'sizes' in product.sizes)
+                                sizeList = (product.sizes as { sizes: string[] }).sizes || [];
+                            if (sizeList.length === 0) sizeList = ['36','37','38','39','40','41','42','43','44','45'];
+
+                            return (
+                                <div className="flex items-center gap-2 shrink-0">
+                                    <select
+                                        value={selectedSize || ''}
+                                        onChange={(e) => setSelectedSize(e.target.value)}
+                                        className="border-2 border-gray-200 bg-gray-50 px-3 py-2.5 text-[11px] font-black uppercase tracking-widest focus:border-black focus:outline-none rounded-lg cursor-pointer min-w-[110px]"
+                                    >
+                                        <option value="" disabled>
+                                            {language === 'ar' ? 'المقاس' : language === 'en' ? 'Size' : 'Taille'}
+                                        </option>
+                                        {sizeList.map(s => (
+                                            <option key={s} value={s}>{selectedSize === s ? `✓ ${s}` : s}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            );
+                        })()}
+
+                        {/* CTA Buttons */}
+                        <button
+                            onClick={() => {
+                                if (!user) { navigate('/login'); return; }
+                                setIsDeliveryModalOpen(true);
+                            }}
+                            className="shrink-0 bg-black text-white px-4 md:px-7 py-3 text-[10px] font-black uppercase tracking-widest hover:bg-gray-900 transition-all active:scale-95 rounded-lg whitespace-nowrap"
+                        >
+                            {t.productDetail.addToCart}
+                        </button>
+
+                        <button
+                            onClick={() => setIsTryOnOpen(true)}
+                            className="shrink-0 hidden md:flex border-2 border-black bg-white px-5 py-3 text-[10px] font-black uppercase tracking-widest text-black hover:bg-gray-50 transition-all active:scale-95 rounded-lg items-center gap-2 whitespace-nowrap"
+                        >
+                            {t.productDetail.virtualTryOn}
+                        </button>
+                    </div>
+                </div>
+            )}
 
         </div>
     );

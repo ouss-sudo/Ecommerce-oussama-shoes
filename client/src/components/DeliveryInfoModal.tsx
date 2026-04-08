@@ -9,8 +9,8 @@ export function DeliveryInfoModal({ isOpen, onClose }: DeliveryInfoModalProps) {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="relative w-full max-w-lg bg-white rounded-xl shadow-2xl p-6 md:p-8 animate-in zoom-in-95 duration-200 border border-gray-100">
+        <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="relative w-full max-w-lg bg-white rounded-xl shadow-2xl p-6 md:p-8 animate-in zoom-in-95 duration-200 border border-gray-100 max-h-[90vh] overflow-y-auto">
                 <button
                     onClick={onClose}
                     className="absolute right-4 top-4 p-2 text-gray-400 hover:text-black transition-colors rounded-full hover:bg-gray-100"
@@ -70,7 +70,7 @@ export function DeliveryInfoModal({ isOpen, onClose }: DeliveryInfoModalProps) {
                     </div>
                 </div>
 
-                <div className="mt-8">
+                <div className="mt-8 pb-4">
                     <button
                         onClick={onClose}
                         className="w-full bg-black text-white py-3 rounded-lg font-bold uppercase tracking-wide hover:bg-gray-900 transition-colors shadow-lg"

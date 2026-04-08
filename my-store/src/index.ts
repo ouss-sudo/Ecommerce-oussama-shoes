@@ -7,7 +7,9 @@ export default {
    *
    * This gives you an opportunity to extend code.
    */
-  register(/* { strapi }: { strapi: Core.Strapi } */) { },
+  register({ strapi }: { strapi: Core.Strapi }) {
+    // Left empty, we will use schema.json extension.
+  },
 
   /**
    * An asynchronous bootstrap function that runs before
@@ -44,9 +46,6 @@ export default {
 `;
           resetPasswordSettings.options.object = 'Réinitialisation de mot de passe - Oussama Shoes';
 
-          // Ensure we write back to the correct key structure if needed, but usually we just modify the object and save it.
-          // If emailSettings.reset_password existed, we modified it in place.
-
           await pluginStore.set({ key: 'email', value: emailSettings });
           strapi.log.info('BOOTSTRAP: Email template for reset password updated successfully.');
         } else {
@@ -57,8 +56,71 @@ export default {
       } else {
         strapi.log.warn('BOOTSTRAP: No email settings found in users-permissions store.');
       }
+
+      // --- NEW: Set Public Permissions for Visitor Tracking ---
+      strapi.log.info('BOOTSTRAP: Setting Public permissions for Visitor API...');
+      const publicRole = await strapi.db.query('plugin::users-permissions.role').findOne({
+        where: { type: 'public' }
+      });
+
+      if (publicRole) {
+        // Define permissions we want to enable for Public
+        const permissions = [
+          { action: 'api::visitor.visitor.ping' },
+          { action: 'api::user-upload.user-upload.upload' }, // Allow upload for ALL (auth check done in controller)
+        ];
+
+        for (const permission of permissions) {
+          const exists = await strapi.db.query('plugin::users-permissions.permission').findOne({
+            where: { role: publicRole.id, action: permission.action }
+          });
+
+          if (!exists) {
+            await strapi.db.query('plugin::users-permissions.permission').create({
+              data: {
+                role: publicRole.id,
+                action: permission.action
+              }
+            });
+            strapi.log.info(`BOOTSTRAP: Enabled ${permission.action} for Public role.`);
+          }
+        }
+      }
+
+      // --- NEW: Set Authenticated Permissions for Upload ---
+      strapi.log.info('BOOTSTRAP: Setting Authenticated permissions for Upload API...');
+      const authenticatedRole = await strapi.db.query('plugin::users-permissions.role').findOne({
+        where: { type: 'authenticated' }
+      });
+
+      if (authenticatedRole) {
+        const permissions = [
+          { action: 'plugin::upload.api.upload' },
+          { action: 'plugin::upload.upload.upload' },
+          { action: 'plugin::upload.content-api.upload' },
+        ];
+
+        for (const permission of permissions) {
+          try {
+              const exists = await strapi.db.query('plugin::users-permissions.permission').findOne({
+                where: { role: authenticatedRole.id, action: permission.action }
+              });
+
+              if (!exists) {
+                await strapi.db.query('plugin::users-permissions.permission').create({
+                  data: {
+                    role: authenticatedRole.id,
+                    action: permission.action
+                  }
+                });
+                strapi.log.info(`BOOTSTRAP: Enabled ${permission.action} for Authenticated role.`);
+              }
+          } catch(e) { /* ignore invalid actions */ }
+        }
+      }
+
     } catch (error) {
-      strapi.log.error('BOOTSTRAP: Failed to update email template:', error);
+      strapi.log.error('BOOTSTRAP: Failed during bootstrap:', error);
     }
   },
 };
