@@ -26,6 +26,8 @@ export default ({ env }) => ({
                 xsmall: 64,
             },
             sizeLimit: 10 * 1024 * 1024, // 10MB
+            // SÉCURITÉ : N'autoriser que les images (Évite l'Upload Attack)
+            allowedTypes: ['images'],
             // Disable responsive images on Windows (causes EPERM temp file errors)
             responsiveDimensions: false,
         },

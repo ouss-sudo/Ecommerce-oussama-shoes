@@ -28,13 +28,31 @@
       "type": "string"
     },
     "price_display": {
-      "type": "string"
+      "type": "string",
+      "maxLength": 10
     },
     "old_price": {
       "type": "string"
     },
+    "price": {
+      "type": "decimal",
+      "required": true
+    },
+    "salePrice": {
+      "type": "decimal"
+    },
+    "stock": {
+      "type": "integer",
+      "default": 0,
+      "min": 0
+    },
+    "sku": {
+      "type": "string",
+      "unique": true
+    },
     "active": {
-      "type": "boolean"
+      "type": "boolean",
+      "default": true
     },
     "categories": {
       "type": "relation",
@@ -124,6 +142,11 @@
       "relation": "oneToMany",
       "target": "api::review.review",
       "mappedBy": "product"
+    },
+    "variants": {
+      "type": "component",
+      "repeatable": true,
+      "component": "product.variant"
     }
   }
 }

@@ -1,9 +1,10 @@
-import { useState, type SyntheticEvent } from "react";
+import { useState, useEffect, type SyntheticEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 import { Loader2 } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
+import { triggerFireworkBurst } from "../lib/celebration";
 
 export default function Login() {
     const { t, dir } = useLanguage();
@@ -11,8 +12,15 @@ export default function Login() {
     const [password, setPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
-    const { login } = useAuth();
+    const { login, user } = useAuth();
     const navigate = useNavigate();
+
+    // Redirect if already logged in
+    useEffect(() => {
+        if (user) {
+            navigate("/");
+        }
+    }, [user, navigate]);
 
     const handleSubmit = async (e: SyntheticEvent) => {
         e.preventDefault();
@@ -25,9 +33,19 @@ export default function Login() {
                 password,
             });
 
-            const { jwt, user } = response.data;
-            login(jwt, user);
-            navigate("/");
+            const { jwt } = response.data;
+            
+            // Fetch full user with avatar populated
+            const userRes = await api.get("/users/me?populate=avatar", {
+                headers: { Authorization: `Bearer ${jwt}` }
+            });
+            
+            const fullUser = userRes.data;
+            login(jwt, fullUser);
+            triggerFireworkBurst();
+            setTimeout(() => {
+                navigate("/");
+            }, 1000);
         } catch (err: any) {
             console.error("Login error:", err);
             if (err.response?.data?.error?.message) {

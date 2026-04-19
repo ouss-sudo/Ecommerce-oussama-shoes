@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { api } from "../lib/api";
-import type { Product, StrapiResponse } from "../types";
+import { api, getStrapiMedia } from "../lib/api";
+import type { Product, StrapiResponse, Category, BannerConfig, StrapiSingleResponse } from "../types";
 import { ProductCard } from "../components/ProductCard";
 import { ProductFilters } from "../components/ProductFilters";
 import { Loader2, LayoutGrid, SlidersHorizontal, X } from "lucide-react";
@@ -37,10 +37,35 @@ export default function Products() {
     const { data: productsData, isLoading } = useQuery({
         queryKey: ["all-products"],
         queryFn: async () => {
-            const res = await api.get<StrapiResponse<Product>>("/products?populate=*&pagination[limit]=100");
+            const res = await api.get<StrapiResponse<Product>>(
+                "/products?fields[0]=name&fields[1]=price_display&fields[2]=slug&fields[3]=description&fields[4]=colors&fields[5]=sizes&populate[0]=cover&populate[1]=image&populate[2]=gallery&populate[3]=categories&pagination[limit]=100&sort=createdAt:desc"
+            );
+            return res.data;
+        },
+        placeholderData: (previousData) => previousData, // Prevents products from disappearing while refetching
+        refetchInterval: 60000, // Sync every minute
+    });
+
+    // Fetch categories with covers
+    const { data: categoriesData } = useQuery({
+        queryKey: ["categories-all"],
+        queryFn: async () => {
+            const res = await api.get<StrapiResponse<Category>>("/categories?populate=*");
             return res.data;
         },
     });
+
+    // Fetch banner config
+    const { data: bannerConfigData } = useQuery({
+        queryKey: ["banner-config"],
+        queryFn: async () => {
+            const res = await api.get<StrapiSingleResponse<BannerConfig>>("/banner-config?populate=*");
+            return res.data;
+        },
+    });
+
+    const categories = categoriesData?.data || [];
+    const bannerConfig = bannerConfigData?.data;
 
     const allFetchedProducts = productsData?.data || [];
 
@@ -48,7 +73,9 @@ export default function Products() {
     const filteredProducts = allFetchedProducts.filter(product => {
         // 1. Category Filter
         if (selectedCategory !== "all") {
-            const hasCategory = product.categories?.some(cat => cat.name === selectedCategory);
+            const hasCategory = product.categories?.some(cat => 
+                cat.name?.toLowerCase() === selectedCategory.toLowerCase()
+            );
             if (!hasCategory) return false;
         }
 
@@ -109,7 +136,8 @@ export default function Products() {
         }
 
         // 6. Price Filter
-        const priceNum = parseInt(product.price_display?.replace(/\D/g, '') || "0");
+        // 6. Price Filter
+        const priceNum = parseFloat(String(product.price_display).replace(',', '.') || "0");
         if (priceNum < priceRange[0] || priceNum > priceRange[1]) return false;
 
         return true;
@@ -166,96 +194,143 @@ export default function Products() {
     };
 
     return (
-        <div className="container py-8 md:py-16 relative overflow-x-hidden">
-            {/* Simple Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-16 px-4">
-                <div>
-                    <h1 className="text-4xl md:text-6xl font-black tracking-tighter uppercase leading-none">
+        <div className="relative overflow-x-hidden">
+            {/* Premium Header Banner */}
+            <div className="relative w-full h-[300px] md:h-[450px] mb-12 -mt-8 overflow-hidden group">
+                {/* Background Image with slight zoom effect */}
+                {(() => {
+                    let bannerUrl = "/shoe_collection_banner.png"; // Default global fallback
+                    
+                    if (selectedCategory === "all") {
+                        if (bannerConfig?.allProductsBanner?.url) {
+                            bannerUrl = getStrapiMedia(bannerConfig.allProductsBanner.url)!;
+                        }
+                    } else if (selectedCategory === "NOUVEAUTÉS") {
+                        bannerUrl = "/new_banner.png"; // Specific fallback
+                        if (bannerConfig?.newArrivalsBanner?.url) {
+                            bannerUrl = getStrapiMedia(bannerConfig.newArrivalsBanner.url)!;
+                        }
+                    } else if (selectedCategory === "HOMME") {
+                        bannerUrl = "/men_banner.png";
+                    } else if (selectedCategory === "FEMME") {
+                        bannerUrl = "/women_banner.png";
+                    } else if (selectedCategory === "ENFANTS" || selectedCategory === "ENFANT") {
+                        bannerUrl = "/kids_banner.png";
+                    }
+
+                    // Always check if Strapi has an override for Categories
+                    if (selectedCategory !== "all" && selectedCategory !== "NOUVEAUTÉS") {
+                        const currentCat = categories.find(c => c.name === selectedCategory);
+                        if (currentCat?.cover?.url) {
+                            bannerUrl = getStrapiMedia(currentCat.cover.url)!;
+                        } else if (currentCat?.image?.url) {
+                            bannerUrl = getStrapiMedia(currentCat.image.url)!;
+                        }
+                    }
+
+                    return (
+                        <img 
+                            src={bannerUrl} 
+                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-10000 group-hover:scale-110" 
+                            alt="Banner"
+                        />
+                    );
+                })()}
+                
+                {/* Dark Overlay */}
+                <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] transition-colors duration-500 group-hover:bg-black/50" />
+                
+                {/* Content Overlay */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
+                    <div className="inline-block px-4 py-1.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-[9px] font-black text-white uppercase tracking-[0.3em] mb-4 animate-in fade-in slide-in-from-bottom-2 duration-700">
+                        {products.length} {t.products.found}
+                    </div>
+                    
+                    <h1 className="text-5xl md:text-8xl font-black text-white uppercase tracking-tighter leading-none mb-8 drop-shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-1000">
                         {selectedCategory === "all" ? t.products.title : (t.categories[selectedCategory as keyof typeof t.categories] || selectedCategory)}
                     </h1>
-                    <p className="mt-4 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
-                        {products.length} {t.products.found}
-                    </p>
-                </div>
 
-                <button
-                    onClick={() => setIsFilterSidebarOpen(!isFilterSidebarOpen)}
-                    className="flex items-center justify-center gap-3 px-10 py-4 bg-black text-white text-[10px] font-black uppercase tracking-widest group hover:bg-gray-800 transition-all duration-300 shadow-xl"
-                >
-                    <SlidersHorizontal className="h-4 w-4 transition-transform duration-500 group-hover:rotate-180" />
-                    {isFilterSidebarOpen ? t.products.close : t.products.filter}
-                </button>
+                    <button
+                        onClick={() => setIsFilterSidebarOpen(!isFilterSidebarOpen)}
+                        className="flex items-center gap-4 bg-white text-black px-10 py-4 text-[10px] font-black uppercase tracking-[0.2em] hover:bg-black hover:text-white transition-all duration-300 shadow-2xl active:scale-95 animate-in fade-in slide-in-from-bottom-6 duration-1000"
+                    >
+                        <SlidersHorizontal className="h-4 w-4" />
+                        {isFilterSidebarOpen ? t.products.close : t.products.filter}
+                    </button>
+                </div>
             </div>
 
-            <div className="flex gap-12">
-                {/* Sidebar Drawer */}
-                <aside
-                    className={`fixed inset-y-0 ${dir === 'rtl' ? 'left-0' : 'right-0'} z-[100] w-full sm:w-[450px] bg-white transform transition-transform duration-500 ease-in-out ${isFilterSidebarOpen ? "translate-x-0" : (dir === 'rtl' ? "-translate-x-full" : "translate-x-full")
-                        } shadow-[-20px_0_60px_-15px_rgba(0,0,0,0.1)]`}
-                >
-                    <div className="h-full relative overflow-y-auto">
-                        <button
+            <div className="container mx-auto px-4 py-8 md:py-16">
+                <div className="flex gap-12">
+                    {/* Sidebar Drawer */}
+                    <aside
+                        className={`fixed inset-y-0 ${dir === 'rtl' ? 'left-0' : 'right-0'} z-[100] w-full sm:w-[450px] bg-white transform transition-transform duration-500 ease-in-out ${isFilterSidebarOpen ? "translate-x-0" : (dir === 'rtl' ? "-translate-x-full" : "translate-x-full")
+                            } shadow-[-20px_0_60px_-15px_rgba(0,0,0,0.1)]`}
+                    >
+                        <div className="h-full relative overflow-y-auto">
+                            <button
+                                onClick={() => setIsFilterSidebarOpen(false)}
+                                className={`absolute top-8 ${dir === 'rtl' ? 'left-8' : 'right-8'} z-20 p-2 hover:bg-gray-50 rounded-full transition-colors border border-gray-100`}
+                            >
+                                <X className="h-6 w-6" />
+                            </button>
+                            <ProductFilters
+                                selectedCategory={selectedCategory}
+                                selectedSizes={selectedSizes}
+                                onSizeChange={toggleSize}
+                                selectedColors={selectedColors}
+                                onColorChange={toggleColor}
+                                selectedTypes={selectedTypes}
+                                onTypeChange={toggleType}
+                                priceRange={priceRange}
+                                onPriceChange={setPriceRange}
+                                sortBy={sortBy}
+                                onSortChange={setSortBy}
+                                onClearAll={clearAllFilters}
+                                itemCount={products.length}
+                                onApply={handleApply}
+                            />
+                        </div>
+                    </aside>
+
+                    {/* Overlay */}
+                    {isFilterSidebarOpen && (
+                        <div
+                            className="fixed inset-0 bg-white/60 backdrop-blur-md z-[90] animate-in fade-in duration-500"
                             onClick={() => setIsFilterSidebarOpen(false)}
-                            className={`absolute top-8 ${dir === 'rtl' ? 'left-8' : 'right-8'} z-20 p-2 hover:bg-gray-50 rounded-full transition-colors border border-gray-100`}
-                        >
-                            <X className="h-6 w-6" />
-                        </button>
-                        <ProductFilters
-                            selectedCategory={selectedCategory}
-                            selectedSizes={selectedSizes}
-                            onSizeChange={toggleSize}
-                            selectedColors={selectedColors}
-                            onColorChange={toggleColor}
-                            selectedTypes={selectedTypes}
-                            onTypeChange={toggleType}
-                            priceRange={priceRange}
-                            onPriceChange={setPriceRange}
-                            sortBy={sortBy}
-                            onSortChange={setSortBy}
-                            onClearAll={clearAllFilters}
-                            itemCount={products.length}
-                            onApply={handleApply}
                         />
-                    </div>
-                </aside>
-
-                {/* Overlay */}
-                {isFilterSidebarOpen && (
-                    <div
-                        className="fixed inset-0 bg-white/60 backdrop-blur-md z-[90] animate-in fade-in duration-500"
-                        onClick={() => setIsFilterSidebarOpen(false)}
-                    />
-                )}
-
-                {/* Main Content */}
-                <div className="flex-1 px-4">
-                    {isLoading ? (
-                        <div className="flex flex-col items-center justify-center py-40 gap-4">
-                            <Loader2 className="h-10 w-10 animate-spin text-black" />
-                            <p className="text-[10px] font-black uppercase tracking-widest animate-pulse">{t.products.loading}</p>
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 animate-in fade-in slide-in-from-bottom-8 duration-1000">
-                            {products.length > 0 ? (
-                                products.map((product) => (
-                                    <ProductCard key={product.id} product={product} />
-                                ))
-                            ) : (
-                                <div className="col-span-full flex flex-col items-center justify-center py-40 text-center gap-8 bg-gray-50/50 rounded-3xl">
-                                    <LayoutGrid className="h-20 w-20 text-gray-100" />
-                                    <div>
-                                        <p className="text-2xl font-black uppercase tracking-tighter mb-2">{t.products.noResult}</p>
-                                    </div>
-                                    <button
-                                        onClick={clearAllFilters}
-                                        className="text-[10px] font-black uppercase tracking-widest bg-black text-white px-10 py-4 hover:bg-gray-800 transition-colors"
-                                    >
-                                        {t.products.reset}
-                                    </button>
-                                </div>
-                            )}
-                        </div>
                     )}
+
+                    {/* Main Content */}
+                    <div className="flex-1 px-4">
+                        {isLoading ? (
+                            <div className="flex flex-col items-center justify-center py-40 gap-4">
+                                <Loader2 className="h-10 w-10 animate-spin text-black" />
+                                <p className="text-[10px] font-black uppercase tracking-widest animate-pulse">{t.products.loading}</p>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+                                {products.length > 0 ? (
+                                    products.map((product) => (
+                                        <ProductCard key={product.id} product={product} />
+                                    ))
+                                ) : (
+                                    <div className="col-span-full flex flex-col items-center justify-center py-40 text-center gap-8 bg-gray-50/50 rounded-3xl">
+                                        <LayoutGrid className="h-20 w-20 text-gray-100" />
+                                        <div>
+                                            <p className="text-2xl font-black uppercase tracking-tighter mb-2">{t.products.noResult}</p>
+                                        </div>
+                                        <button
+                                            onClick={clearAllFilters}
+                                            className="text-[10px] font-black uppercase tracking-widest bg-black text-white px-10 py-4 hover:bg-gray-800 transition-colors"
+                                        >
+                                            {t.products.reset}
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

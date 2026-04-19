@@ -67,6 +67,14 @@
       "type": "string",
       "configurable": true
     },
+    "firstName": {
+      "type": "string",
+      "configurable": true
+    },
+    "lastName": {
+      "type": "string",
+      "configurable": true
+    },
     "avatar": {
       "type": "media",
       "multiple": false,
@@ -85,6 +93,38 @@
     },
     "postalCode": {
       "type": "string",
+      "configurable": true
+    },
+    "loyaltyPoints": {
+      "type": "integer",
+      "default": 0,
+      "configurable": true
+    },
+    "loyaltyLevel": {
+      "type": "string",
+      "default": "BRONZE",
+      "configurable": true
+    },
+    "gender": {
+      "type": "enumeration",
+      "enum": [
+        "m",
+        "mme"
+      ],
+      "configurable": true
+    },
+    "birthDate": {
+      "type": "date",
+      "configurable": true
+    },
+    "newsletterOptIn": {
+      "type": "boolean",
+      "default": false,
+      "configurable": true
+    },
+    "partnersOptIn": {
+      "type": "boolean",
+      "default": false,
       "configurable": true
     }
   }

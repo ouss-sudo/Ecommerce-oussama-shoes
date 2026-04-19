@@ -43,6 +43,7 @@ export interface Category {
     slug: string;
     description?: string;
     image?: StrapiImage;
+    cover?: StrapiImage;
 }
 
 export interface Brand {
@@ -61,6 +62,8 @@ export interface Variant {
     color?: string;
     price_modifier?: number;
     stock?: number;
+    size_link?: { name: string };
+    color_link?: { name: string };
 }
 
 export interface Product {
@@ -83,6 +86,7 @@ export interface Product {
     categories?: Category[];
     brand?: Brand;
     variants?: Variant[];
+    stock?: number;
     seo?: SeoComponent;
     createdAt: string;
     updatedAt: string;
@@ -95,6 +99,27 @@ export interface ContactRequest {
     email: string;
     subject: string;
     message: string;
+}
+
+export interface FlashSale {
+    id: number;
+    documentId: string;
+    title: string;
+    description: string;
+    isActive: boolean;
+    startAt?: string;
+    endAt: string;
+    discountPercentage: number;
+}
+
+export interface BannerConfig {
+    id: number;
+    documentId: string;
+    allProductsBanner?: StrapiImage;
+    promotionsBanner?: StrapiImage;
+    newArrivalsBanner?: StrapiImage;
+    announcementText?: string;
+    showAnnouncement?: boolean;
 }
 
 export interface Page {

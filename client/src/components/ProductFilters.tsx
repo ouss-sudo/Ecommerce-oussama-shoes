@@ -52,7 +52,7 @@ export function ProductFilters({
         sizesToDisplay = WOMEN_SIZES;
     } else if (isMen || selectedCategory === "NOUVEAUTES" || selectedCategory === "NOUVEAUTÉS" || selectedCategory === "NEW") {
         sizesToDisplay = MEN_SIZES;
-    } else if (selectedCategory === "all") {
+    } else if (selectedCategory === "all" || selectedCategory === "OFFRE") {
         sizesToDisplay = [...KIDS_SIZES, ...MEN_SIZES];
     } else {
         sizesToDisplay = MEN_SIZES;
@@ -65,6 +65,26 @@ export function ProductFilters({
         { name: language === 'en' ? "Blue" : (language === 'ar' ? 'أزرق' : 'Bleu'), hex: "#0000FF" },
         { name: language === 'en' ? "Green" : (language === 'ar' ? 'أخضر' : 'Vert'), hex: "#00FF00" },
         { name: language === 'en' ? "Grey" : (language === 'ar' ? 'رمادي' : 'Gris'), hex: "#808080" },
+        { name: language === 'en' ? "Beige" : (language === 'ar' ? 'بيج' : 'Beige'), hex: "#F5F5DC" },
+        { name: language === 'en' ? "Brown" : (language === 'ar' ? 'بني' : 'Marron'), hex: "#8B4513" },
+        { name: language === 'en' ? "Pink" : (language === 'ar' ? 'وردي' : 'Rose'), hex: "#FFC0CB" },
+        { name: language === 'en' ? "Navy" : (language === 'ar' ? 'كحلي' : 'Bleu Marine'), hex: "#000080" },
+        { name: language === 'en' ? "Orange" : (language === 'ar' ? 'برتقالي' : 'Orange'), hex: "#FFA500" },
+        { name: language === 'en' ? "Yellow" : (language === 'ar' ? 'أصفر' : 'Jaune'), hex: "#FFFF00" },
+        { name: language === 'en' ? "Purple" : (language === 'ar' ? 'بنفسجي' : 'Violet'), hex: "#800080" },
+        { name: language === 'en' ? "Gold" : (language === 'ar' ? 'ذهبي' : 'Doré'), hex: "#D4AF37" },
+        { name: language === 'en' ? "Silver" : (language === 'ar' ? 'فضي' : 'Argenté'), hex: "#C0C0C0" },
+        { name: language === 'en' ? "Burgundy" : (language === 'ar' ? 'عنابي' : 'Bordeaux'), hex: "#800000" },
+        { name: language === 'en' ? "Turquoise" : (language === 'ar' ? 'فيروزي' : 'Turquoise'), hex: "#40E0D0" },
+        { name: language === 'en' ? "Khaki" : (language === 'ar' ? 'خاكي' : 'Kaki'), hex: "#C3B091" },
+        { name: language === 'en' ? "Camel" : (language === 'ar' ? 'جملي' : 'Camel'), hex: "#C19A6B" },
+        { name: language === 'en' ? "Lime" : (language === 'ar' ? 'ليموني' : 'Citron Vert'), hex: "#32CD32" },
+        { name: language === 'en' ? "Teal" : (language === 'ar' ? 'تيلي' : 'Sarcelle'), hex: "#008080" },
+        { name: language === 'en' ? "Indigo" : (language === 'ar' ? 'نيلي' : 'Indigo'), hex: "#4B0082" },
+        { name: language === 'en' ? "Brick" : (language === 'ar' ? 'قرميدي' : 'Brique'), hex: "#F7630C" },
+        { name: language === 'en' ? "Bronze" : (language === 'ar' ? 'برونزي' : 'Bronze'), hex: "#CD7F32" },
+        { name: language === 'en' ? "Taupe" : (language === 'ar' ? 'رمادي داكن' : 'Taupe'), hex: "#483C32" },
+        { name: language === 'en' ? "Multicolor" : (language === 'ar' ? 'متعدد الألوان' : 'Multicolore'), hex: "multicolor" },
     ];
 
     const ALL_SHOE_TYPES = [
@@ -226,24 +246,39 @@ export function ProductFilters({
             {/* Colors */}
             <div className="border-t border-gray-100 py-8 mb-32">
                 <h3 className="text-[10px] font-black uppercase tracking-widest mb-6">{t.products.colors}</h3>
-                <div className="flex flex-wrap gap-4">
-                    {COLORS.map((color) => (
-                        <button
-                            key={color.name}
-                            onClick={() => onColorChange(color.name)}
-                            className={`group relative h-10 w-10 border-2 transition-all duration-300 overflow-hidden ${selectedColors.includes(color.name) ? "border-black scale-110 shadow-lg" : "border-gray-100 hover:border-black"
+                <div className="flex flex-wrap gap-3">
+                    {COLORS.map((color) => {
+                        const isMulti = color.hex === 'multicolor';
+                        const isLight = color.hex === '#FFFFFF' || color.hex === '#FFFF00' || color.hex === '#F5F5DC';
+                        return (
+                            <button
+                                key={color.name}
+                                onClick={() => onColorChange(color.name)}
+                                title={color.name}
+                                className={`group relative h-10 w-10 border-2 transition-all duration-300 overflow-hidden rounded-sm ${
+                                    selectedColors.includes(color.name)
+                                        ? 'border-black scale-110 shadow-lg'
+                                        : 'border-gray-200 hover:border-black'
                                 }`}
-                            style={{ backgroundColor: color.hex }}
-                            title={color.name}
-                        >
-                            <span className="sr-only">{color.name}</span>
-                            {selectedColors.includes(color.name) && (
-                                <div className="absolute inset-0 flex items-center justify-center bg-black/10">
-                                    <div className={`h-2 w-2 rounded-full ${color.hex === '#FFFFFF' ? 'bg-black' : 'bg-white'}`} />
-                                </div>
-                            )}
-                        </button>
-                    ))}
+                                style={isMulti ? {
+                                    background: 'conic-gradient(red, yellow, lime, aqua, blue, magenta, red)'
+                                } : {
+                                    backgroundColor: color.hex
+                                }}
+                            >
+                                <span className="sr-only">{color.name}</span>
+                                {selectedColors.includes(color.name) && (
+                                    <div className="absolute inset-0 flex items-center justify-center bg-black/10">
+                                        <div className={`h-2 w-2 rounded-full ${isLight ? 'bg-black' : 'bg-white'}`} />
+                                    </div>
+                                )}
+                                {/* Tooltip on hover */}
+                                <span className="absolute -top-7 left-1/2 -translate-x-1/2 bg-black text-white text-[8px] font-black uppercase tracking-wider px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                                    {color.name}
+                                </span>
+                            </button>
+                        );
+                    })}
                 </div>
             </div>
 

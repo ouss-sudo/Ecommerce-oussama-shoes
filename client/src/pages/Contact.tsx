@@ -25,7 +25,17 @@ export default function Contact() {
 
     const mutation = useMutation({
         mutationFn: async (data: ContactForm) => {
-            const strapiPromise = api.post("/contact-requests", { data });
+            const contactData = {
+                fullName: data.name,
+                email: data.email,
+                message: [
+                    {
+                        type: "paragraph",
+                        children: [{ type: "text", text: `SUJET: ${data.subject}\n\n${data.message}` }]
+                    }
+                ]
+            };
+            const strapiPromise = api.post("/contact-requests", { data: contactData });
             const emailPromise = fetch("https://formsubmit.co/ajax/oussama21072000@gmail.com", {
                 method: "POST",
                 headers: {

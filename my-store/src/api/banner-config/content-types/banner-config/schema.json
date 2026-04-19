@@ -1,0 +1,66 @@
+{
+  "kind": "singleType",
+  "collectionName": "banner_configs",
+  "info": {
+    "singularName": "banner-config",
+    "pluralName": "banner-configs",
+    "displayName": "Banner Configuration",
+    "description": "Configure banners for main pages"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "homeHeroSlider1": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images", "videos"]
+    },
+    "homeHeroSlider2": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images", "videos"]
+    },
+    "homeHeroSlider3": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images", "videos"]
+    },
+    "allProductsBanner": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "promotionsBanner": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "newArrivalsBanner": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "announcementText": {
+      "type": "string"
+    },
+    "showAnnouncement": {
+      "type": "boolean",
+      "default": false
+    },
+    "isDeliveryEnabled": {
+      "type": "boolean",
+      "default": true
+    },
+    "deliveryDisabledMessage": {
+      "type": "string"
+    }
+  }
+}

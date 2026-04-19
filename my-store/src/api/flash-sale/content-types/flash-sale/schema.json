@@ -1,0 +1,39 @@
+{
+  "kind": "singleType",
+  "collectionName": "flash_sales",
+  "info": {
+    "singularName": "flash-sale",
+    "pluralName": "flash-sales",
+    "displayName": "Vente Flash",
+    "description": "Configuration de la minuterie pour les offres spéciales"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "text"
+    },
+    "isActive": {
+      "type": "boolean",
+      "default": false
+    },
+    "startAt": {
+      "type": "datetime"
+    },
+    "endAt": {
+      "type": "datetime",
+      "required": true
+    },
+    "discountPercentage": {
+      "type": "integer",
+      "min": 1,
+      "max": 99
+    }
+  }
+}

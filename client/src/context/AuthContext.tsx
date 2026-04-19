@@ -1,14 +1,25 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
 import { api } from "../lib/api";
 
 interface User {
     id: number;
     username: string;
     email: string;
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
+    address?: string;
+    city?: string;
+    postalCode?: string;
+    gender?: string;
+    birthDate?: string;
     confirmed: boolean;
     blocked: boolean;
     createdAt: string;
     updatedAt: string;
+    avatar?: { url: string };
+    loyaltyPoints?: number;
+    loyaltyLevel?: "BRONZE" | "SILVER" | "GOLD";
 }
 
 interface AuthContextType {
@@ -27,16 +38,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        const storedToken = localStorage.getItem("token");
-        const storedUser = localStorage.getItem("user");
+        const validateToken = async () => {
+            const storedToken = localStorage.getItem("token");
+            const storedUser = localStorage.getItem("user");
 
-        if (storedToken && storedUser) {
-            setToken(storedToken);
-            setUser(JSON.parse(storedUser));
-            // Optional: Validate token with API call here using /users/me
-            // strict validation would check if token is still valid
-        }
-        setIsLoading(false);
+            if (storedToken && storedUser) {
+                try {
+                    // Force the token for this initial validation call
+                    const res = await api.get<User>("/users/me?populate=avatar", {
+                        headers: { Authorization: `Bearer ${storedToken}` }
+                    });
+                    setToken(storedToken);
+                    setUser(res.data);
+                } catch (err) {
+                    console.error("Session expired or invalid token", err);
+                    logout();
+                }
+            }
+            setIsLoading(false);
+        };
+
+        validateToken();
     }, []);
 
     const login = (newToken: string, newUser: User) => {

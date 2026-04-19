@@ -1,0 +1,54 @@
+{
+  "kind": "collectionType",
+  "collectionName": "coupons",
+  "info": {
+    "singularName": "coupon",
+    "pluralName": "coupons",
+    "displayName": "Coupon",
+    "description": "Promo codes for discounts"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "code": {
+      "type": "string",
+      "unique": true,
+      "required": true
+    },
+    "type": {
+      "type": "enumeration",
+      "enum": [
+        "percentage",
+        "fixed"
+      ],
+      "required": true
+    },
+    "value": {
+      "type": "decimal",
+      "required": true
+    },
+    "expirationDate": {
+      "type": "datetime"
+    },
+    "usageLimit": {
+      "type": "integer",
+      "default": 100
+    },
+    "timesUsed": {
+      "type": "integer",
+      "default": 0
+    },
+    "minOrderAmount": {
+      "type": "decimal",
+      "default": 0
+    },
+    "maxDiscount": {
+      "type": "decimal"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    }
+  }
+}

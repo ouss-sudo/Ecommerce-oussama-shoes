@@ -1,0 +1,23 @@
+{
+  "collectionName": "components_product_variants",
+  "info": {
+    "displayName": "Variant",
+    "icon": "list",
+    "description": "Stock management by size and color"
+  },
+  "options": {},
+  "attributes": {
+    "size_link": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::size.size"
+    },
+    "color_link": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::color.color"
+    },
+    "stock": { "type": "integer", "default": 0 },
+    "price_modifier": { "type": "decimal" }
+  }
+}

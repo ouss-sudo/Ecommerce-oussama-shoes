@@ -1,4 +1,6 @@
-import { X, MapPin, Store } from "lucide-react";
+import { X, MapPin, Store, Loader2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "../lib/api";
 
 interface DeliveryInfoModalProps {
     isOpen: boolean;
@@ -6,7 +8,19 @@ interface DeliveryInfoModalProps {
 }
 
 export function DeliveryInfoModal({ isOpen, onClose }: DeliveryInfoModalProps) {
+    const { data: config, isLoading } = useQuery({
+        queryKey: ["banner-config-delivery"],
+        queryFn: async () => {
+            const res = await api.get("/banner-config");
+            return res.data.data;
+        },
+        enabled: isOpen,
+    });
+
     if (!isOpen) return null;
+
+    const isDeliveryEnabled = config?.isDeliveryEnabled ?? false;
+    const customMessage = config?.deliveryDisabledMessage || "La livraison n'est pas disponible pour le moment.";
 
     return (
         <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
@@ -25,12 +39,26 @@ export function DeliveryInfoModal({ isOpen, onClose }: DeliveryInfoModalProps) {
                     <h2 className="text-2xl font-bold uppercase tracking-tight text-gray-900">
                         Information Livraison
                     </h2>
-                    <p className="text-red-500 font-medium bg-red-50 py-2 px-4 rounded-full inline-block text-sm">
-                        La livraison n'est pas disponible pour le moment.
-                    </p>
-                    <p className="text-gray-600">
-                        Nous serons ravis de vous accueillir directement dans nos boutiques pour effectuer vos achats.
-                    </p>
+                    
+                    {isLoading ? (
+                        <div className="flex justify-center p-4">
+                            <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+                        </div>
+                    ) : isDeliveryEnabled ? (
+                        <div className="bg-green-50 border border-green-100 p-4 rounded-xl text-center">
+                            <p className="text-green-700 font-bold uppercase tracking-widest text-[10px] mb-1">Service Actif</p>
+                            <p className="text-green-600 text-sm">La livraison à domicile est disponible ! Vous pouvez passer commande.</p>
+                        </div>
+                    ) : (
+                        <>
+                            <p className="text-red-500 font-medium bg-red-50 py-2 px-4 rounded-full inline-block text-sm">
+                                {customMessage}
+                            </p>
+                            <p className="text-gray-600">
+                                Nous serons ravis de vous accueillir directement dans nos boutiques pour effectuer vos achats.
+                            </p>
+                        </>
+                    )}
                 </div>
 
                 <div className="space-y-4 bg-gray-50 p-5 rounded-lg border border-gray-100">

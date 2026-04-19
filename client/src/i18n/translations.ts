@@ -11,6 +11,7 @@ export const translations = {
             contact: "Contact",
             search: "Rechercher...",
             login: "Connexion",
+            offres: "Offres",
             profile: "Mon Profil",
             logout: "Déconnexion"
         },
@@ -21,7 +22,19 @@ export const translations = {
             essentials: "LES ESSENTIELS",
             noFeatured: "Aucun produit mis en avant pour le moment.",
             teaserTitle: "Votre style, votre règle",
-            teaserBtn: "Découvrir"
+            teaserBtn: "Découvrir",
+            bestSellers: "Les plus vendus",
+            noInCategory: "Aucun produit disponible dans cette catégorie pour le moment.",
+            guarantees: {
+                freeShipping: "Livraison Gratuite",
+                freeShippingDesc: "À partir de 150DT d'achats",
+                securePayment: "Paiement sécurisé",
+                securePaymentDesc: "Paiement à la livraison",
+                satisfaction: "Satisfaction garantie",
+                satisfactionDesc: "Un service client à votre écoute",
+                fastDelivery: "Livraison rapide",
+                fastDeliveryDesc: "Vos articles en 24/48h chez vous"
+            }
         },
         products: {
             title: "Nos Produits",
@@ -100,9 +113,40 @@ export const translations = {
             memberSince: "Membre depuis",
             save: "Enregistrer les modifications",
             success: "Profil mis à jour avec succès.",
-            error: "Une erreur est survenue lors de la mise à jour."
+            error: "Une erreur est survenue lors de la mise à jour.",
+            personalInfo: "Informations personnelles",
+            deliveryAddress: "Adresse de livraison",
+            phone: "Téléphone",
+            address: "Adresse",
+            city: "Ville",
+            zip: "Code Postal",
+            optional: "Optionnel",
+            avatarSuccess: "Image de profil mise à jour avec succès !",
+            placeholderCity: "Ex: Nabeul",
+            placeholderZip: "Ex: 8000",
+            placeholderAddress: "Ex: 12 Rue de la Paix"
+        },
+        loyalty: {
+            points: "Points de Fidélité",
+            level: "Niveau",
+            howItWorks: "Comment ça marche ?",
+            gainRule: "1 DT = 1 Point",
+            benefitRule: "500 Points = 10 DT de réduction",
+            nextReward: "Prochaine récompense",
+            bronze: "Boutique Bronze",
+            silver: "Boutique Silver",
+            gold: "Boutique Gold",
+            cardHolder: "Détenteur de la carte",
+            memberSince: "Membre depuis",
+            exclusive: "Carte Exclusive",
+            benefits: {
+                bronze: "Commencez à cumuler dès aujourd'hui !",
+                silver: "10 DT de réduction débloqués !",
+                gold: "Livraison gratuite + Cadeaux exclusifs !"
+            }
         },
         categories: {
+            OFFRE: "Offres",
             HOMME: "Homme",
             FEMME: "Femme",
             ENFANTS: "Enfants",
@@ -139,6 +183,22 @@ export const translations = {
             terms: "Conditions D'utilisation",
             about: "À Propos",
             copyright: "© 2026 Oussama Shoes – Votre Boutique Numérique. Tous droits réservés."
+        },
+        promotions: {
+            title: "Promotions",
+            subtitle: "Découvrez nos meilleures offres sur une large sélection de modèles. Profitez-en avant épuisement des stocks !",
+            noPromo: "Aucune promotion en cours"
+        },
+        flashSale: {
+            limited: "Offre Limitée",
+            startsIn: "L'offre commence dans :",
+            endsIn: "L'offre finit dans :",
+            noActive: "Aucune vente flash active pour le moment",
+            itemsTitle: "Articles en promotion",
+            models: "Modèles",
+            backSoon: "Revenez bientôt pour de nouvelles offres !",
+            startDate: "Date de début",
+            endDate: "Date de fin"
         }
     },
     en: {
@@ -151,6 +211,7 @@ export const translations = {
             contact: "Contact",
             search: "Search...",
             login: "Login",
+            offres: "Offers",
             profile: "My Profile",
             logout: "Logout"
         },
@@ -161,7 +222,19 @@ export const translations = {
             essentials: "THE ESSENTIALS",
             noFeatured: "No featured products at the moment.",
             teaserTitle: "Your Style, Your Rule",
-            teaserBtn: "Explore"
+            teaserBtn: "Explore",
+            bestSellers: "Bestsellers",
+            noInCategory: "No products available in this category for now.",
+            guarantees: {
+                freeShipping: "Free Shipping",
+                freeShippingDesc: "On orders over 150DT",
+                securePayment: "Secure Payment",
+                securePaymentDesc: "Cash on delivery",
+                satisfaction: "Satisfaction Guaranteed",
+                satisfactionDesc: "Support at your service",
+                fastDelivery: "Fast Delivery",
+                fastDeliveryDesc: "Items in 24/48h at your door"
+            }
         },
         products: {
             title: "Our Products",
@@ -240,9 +313,40 @@ export const translations = {
             memberSince: "Member since",
             save: "Save Changes",
             success: "Profile updated successfully.",
-            error: "An error occurred during update."
+            error: "An error occurred during update.",
+            personalInfo: "Personal Information",
+            deliveryAddress: "Delivery Address",
+            phone: "Phone",
+            address: "Address",
+            city: "City",
+            zip: "Postal Code",
+            optional: "Optional",
+            avatarSuccess: "Profile picture updated successfully!",
+            placeholderCity: "Ex: Nabeul",
+            placeholderZip: "Ex: 8000",
+            placeholderAddress: "Ex: 12 Peace Street"
+        },
+        loyalty: {
+            points: "Loyalty Points",
+            level: "Level",
+            howItWorks: "How it works?",
+            gainRule: "1 DT = 1 Point",
+            benefitRule: "500 Points = 10 DT discount",
+            nextReward: "Next reward",
+            bronze: "Bronze Tier",
+            silver: "Silver Tier",
+            gold: "Gold Tier",
+            cardHolder: "Card Holder",
+            memberSince: "Member Since",
+            exclusive: "Exclusive Card",
+            benefits: {
+                bronze: "Start collecting points today!",
+                silver: "10 DT discount unlocked!",
+                gold: "Free delivery + Exclusive gifts!"
+            }
         },
         categories: {
+            OFFRE: "Offers",
             HOMME: "Men",
             FEMME: "Women",
             ENFANTS: "Kids",
@@ -279,6 +383,22 @@ export const translations = {
             terms: "Terms of Use",
             about: "About Us",
             copyright: "© 2026 Oussama Shoes – Your Digital Boutique. All rights reserved."
+        },
+        promotions: {
+            title: "Promotions",
+            subtitle: "Discover our best offers on a wide selection of models. Enjoy them before stocks run out!",
+            noPromo: "No promotions currently in progress"
+        },
+        flashSale: {
+            limited: "Limited Offer",
+            startsIn: "Offer starts in:",
+            endsIn: "Offer ends in:",
+            noActive: "No flash sale active at the moment",
+            itemsTitle: "Items on sale",
+            models: "Models",
+            backSoon: "Check back soon for new offers!",
+            startDate: "Start Date",
+            endDate: "End Date"
         }
     },
     ar: {
@@ -291,6 +411,7 @@ export const translations = {
             contact: "اتصل بنا",
             search: "بحث...",
             login: "دخول",
+            offres: "عروض",
             profile: "ملفي الشخصي",
             logout: "خروج"
         },
@@ -301,7 +422,19 @@ export const translations = {
             essentials: "الأساسيات",
             noFeatured: "لا توجد منتجات مميزة حالياً.",
             teaserTitle: "ستايلك، قانونك",
-            teaserBtn: "اكتشف"
+            teaserBtn: "اكتشف",
+            bestSellers: "الأكثر مبيعاً",
+            noInCategory: "لا توجد منتجات في هذا القسم حاليا",
+            guarantees: {
+                freeShipping: "توصيل مجاني",
+                freeShippingDesc: "للمشتريات بقيمة 150 دينار أو أكثر",
+                securePayment: "دفع آمن",
+                securePaymentDesc: "الدفع عند الاستلام",
+                satisfaction: "رضا مضمون",
+                satisfactionDesc: "خدمة عملاء في استماعكم",
+                fastDelivery: "توصيل سريع",
+                fastDeliveryDesc: "منتجاتك تصلك خلال 24/48 ساعة"
+            }
         },
         products: {
             title: "منتجاتنا",
@@ -380,9 +513,40 @@ export const translations = {
             memberSince: "عضو منذ",
             save: "حفظ التغييرات",
             success: "تم تحديث الملف الشخصي بنجاح.",
-            error: "حدث خطأ أثناء التحديث."
+            error: "حدث خطأ أثناء التحديث.",
+            personalInfo: "معلومات شخصية",
+            deliveryAddress: "عنوان التوصيل",
+            phone: "الهاتف",
+            address: "العنوان",
+            city: "المدينة",
+            zip: "الرمز البريدي",
+            optional: "اختياري",
+            avatarSuccess: "تم تحديث صورة الملف الشخصي بنجاح!",
+            placeholderCity: "مثال: نابل",
+            placeholderZip: "مثال: 8000",
+            placeholderAddress: "مثال: نهج السلام 12"
+        },
+        loyalty: {
+            points: "نقاط الوفاء",
+            level: "المستوى",
+            howItWorks: "كيف يعمل النظام؟",
+            gainRule: "1 د.ت = 1 نقطة",
+            benefitRule: "500 نقطة = 10 د.ت خصم",
+            nextReward: "المكافأة التالية",
+            bronze: "المستوى البرونزي",
+            silver: "المستوى الفضي",
+            gold: "المستوى الذهبي",
+            cardHolder: "صاحب البطاقة",
+            memberSince: "عضو منذ",
+            exclusive: "بطاقة حصرية",
+            benefits: {
+                bronze: "ابدأ بجمع النقاط اليوم!",
+                silver: "تم فتح خصم 10 د.ت!",
+                gold: "توصيل مجاني + هدايا حصرية!"
+            }
         },
         categories: {
+            OFFRE: "عروض",
             HOMME: "رجال",
             FEMME: "نساء",
             ENFANTS: "أطفال",
@@ -419,6 +583,22 @@ export const translations = {
             terms: "شروط الاستخدام",
             about: "حولنا",
             copyright: "© 2026 Oussama Shoes – متجركم الرقمي. جميع الحقوق محفوظة."
+        },
+        promotions: {
+            title: "تخفيضات",
+            subtitle: "اكتشف أفضل عروضنا على مجموعة واسعة من الموديلات. استمتع بها قبل نفاد الكمية!",
+            noPromo: "لا توجد تخفيضات حاليا"
+        },
+        flashSale: {
+            limited: "عرض محدود",
+            startsIn: "يبدأ العرض خلال:",
+            endsIn: "ينتهي العرض خلال:",
+            noActive: "لا توجد تخفيضات حاليا",
+            itemsTitle: "منتجات معروضة",
+            models: "موديلات",
+            backSoon: "انتظرونا قريباً للحصول على عروض جديدة!",
+            startDate: "تاريخ البدء",
+            endDate: "تاريخ الانتهاء"
         }
     }
 };

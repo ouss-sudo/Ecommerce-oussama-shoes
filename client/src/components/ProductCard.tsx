@@ -3,7 +3,7 @@ import type { Product } from "../types";
 import { getStrapiMedia } from "../lib/api";
 import { cn } from "../lib/utils";
 import { useLanguage } from "../context/LanguageContext";
-import { useState } from "react";
+import { useState, useMemo, memo } from "react";
 
 interface ProductCardProps {
     product: Product;
@@ -12,21 +12,23 @@ interface ProductCardProps {
     height?: number;
 }
 
-export function ProductCard({
+export const ProductCard = memo(function ProductCard({
     product,
     className,
 }: ProductCardProps) {
     const { language, t, dir } = useLanguage();
     const [activeIndex, setActiveIndex] = useState(0);
 
-    // Rassembler toutes les images disponibles
-    const allImages = [
-        product.cover,
-        ...(product.image || []),
-        ...(product.gallery || [])
-    ].filter((img, idx, arr) =>
-        !!img?.url && arr.findIndex(i => i?.url === img.url) === idx
-    );
+    // Rassembler toutes les images disponibles sans recalculer à chaque render
+    const allImages = useMemo(() => {
+        return [
+            product.cover,
+            ...(product.image || []),
+            ...(product.gallery || [])
+        ].filter((img, idx, arr) =>
+            !!img?.url && arr.findIndex(i => i?.url === img.url) === idx
+        );
+    }, [product.cover, product.image, product.gallery]);
 
     const productLink = product.slug ? `/products/${product.slug}` : `/products/${product.documentId}`;
     const categoryName = product.categories?.[0]?.name;
@@ -64,7 +66,7 @@ export function ProductCard({
                 <div className="absolute inset-0 z-10">
                     {allImages.length > 0 ? (
                         <img
-                            src={getStrapiMedia(allImages[activeIndex]?.url || "") || ""}
+                            src={getStrapiMedia(allImages[activeIndex], 'small') || getStrapiMedia(allImages[activeIndex]) || ""}
                             alt={product.name}
                             className="h-full w-full object-cover transition-all duration-700 group-hover:scale-110"
                             loading="lazy"
@@ -104,8 +106,8 @@ export function ProductCard({
                 <div className={`flex items-center gap-2 pt-1 flex-wrap ${dir === 'rtl' ? 'flex-row-reverse justify-end' : ''}`}>
                     {/* Current Price */}
                     <div className="relative">
-                        <span className="text-[18px] font-black tracking-tight text-black leading-none">
-                            {product.price_display}
+                        <span className="text-[20px] font-black tracking-tighter text-red-600 leading-none flex items-baseline gap-1">
+                            {product.price_display} <span className="text-black">TND</span> <span className="text-[8px] font-bold text-gray-400 uppercase tracking-tighter">TTC</span>
                         </span>
                         {/* Red underline accent */}
                         <span className="absolute -bottom-0.5 left-0 h-[3px] w-full bg-gradient-to-r from-red-600 to-orange-400 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300" />
@@ -115,7 +117,7 @@ export function ProductCard({
                         <>
                             {/* Old price strikethrough */}
                             <span className="text-[12px] font-bold text-gray-300 line-through decoration-gray-200">
-                                {product.old_price}
+                                {product.old_price} <span className="text-black/30 ml-1">TND</span>
                             </span>
 
                             {/* Discount % pill */}
@@ -138,4 +140,4 @@ export function ProductCard({
             </Link>
         </div>
     );
-}
+});
